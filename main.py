@@ -1,6 +1,8 @@
+from typing import List
+
 import uvicorn
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 from src.scrapper import scrap_paragraphs
 
@@ -22,6 +24,14 @@ def get_paragraphs(url: str):
     return {
         'paragraphs': scrap_paragraphs(url)
     }
+
+
+@app.post('/get_paragraph_by_index')
+def get_paragraph_by_index(url: str, indexes: List[int]):
+    paragraphs = scrap_paragraphs(url)
+    if any(id > len(paragraphs) for id in indexes):
+        raise HTTPException(status_code=400, detail='index greater than paragraphs length')
+    return [{id: paragraphs[id]} for id in indexes]
 
 
 if __name__ == "__main__":
